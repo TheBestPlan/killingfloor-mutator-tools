@@ -1,0 +1,44 @@
+# Killing Floor / Unreal Engine 2.5 packages, including everything a build produces.
+# UCC.exe and the engine packages are Tripwire's binaries — bring your own, never commit them.
+*.u
+*.ucl
+*.uz2
+*.utx
+*.usx
+*.ukx
+*.uax
+*.umx
+*.int
+*.upl
+*.exe
+*.dll
+
+# Isolated compile workspace (the default `workspace` value) and the build output folder.
+/.ucc/
+/dist/
+
+# Local, machine-specific config. Only the .example.json is committed.
+killingfloor-mutator-tools.config.json
+
+# Prebuilt dependency packages and any UCC.exe staged by hand.
+/vendor/
+
+# Working notes that are not part of the published repo.
+/HANDOFF.md
+/*-this-session-is-being-continued-*.txt
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~
+
+# node / misc
+node_modules/
+npm-debug.log*
+package-lock.json
+*.log
+*.tmp

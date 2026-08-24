@@ -1,0 +1,17 @@
+{
+  "gamePath": "D:/games/SteamLibrary/steamapps/common/KillingFloor",
+  "uccPath": "",
+  "workspace": ".ucc",
+  "packages": [
+    "../killingfloor-mutators/KF15BetaMutators"
+  ],
+  "resourcePaths": [
+    "../killingfloor-mutators/KF15BetaMutators-resources"
+  ],
+  "outputPath": "dist",
+  "copyTo": [],
+  "strip": true,
+  "compress": true,
+  "buildInfoClass": "BuildInfo",
+  "wine": "wine"
+}

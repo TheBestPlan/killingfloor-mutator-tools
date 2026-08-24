@@ -1,0 +1,124 @@
+{
+  "name": "killingfloor-mutator-tools",
+  "productName": "Killing Floor Mutator Tools",
+  "version": "0.1.0",
+  "description": "Cross-platform UCC wrapper that compiles Killing Floor mutators (Unreal Engine 2.5) without touching the game install",
+  "author": "TheBestPlan (https://github.com/TheBestPlan)",
+  "license": "GPL-3.0-or-later",
+  "packageManager": "pnpm@11.13.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheBestPlan/killingfloor-mutator-tools.git"
+  },
+  "funding": [
+    "https://buymeacoffee.com/TheBestPlan",
+    "https://ko-fi.com/TheBestPlan",
+    "https://liberapay.com/TheBestPlan"
+  ],
+  "main": "electron/main.js",
+  "bin": {
+    "killingfloor-mutator-tools": "bin/killingfloor-mutator-tools.js"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "killingfloor-mutator-tools.config.example.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "killingfloor",
+    "unrealscript",
+    "unreal-engine-2",
+    "ucc",
+    "mutator",
+    "build-tool"
+  ],
+  "scripts": {
+    "start": "electron .",
+    "build": "node bin/killingfloor-mutator-tools.js build",
+    "check": "node bin/killingfloor-mutator-tools.js check",
+    "detect": "node bin/killingfloor-mutator-tools.js detect",
+    "gui": "node bin/killingfloor-mutator-tools.js gui",
+    "test": "node test/smoke.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "release": "electron-builder --publish always",
+    "bump": "commit-and-tag-version",
+    "prepare": "husky"
+  },
+  "build": {
+    "appId": "com.thebestplan.killingfloormutatortools",
+    "productName": "Killing Floor Mutator Tools",
+    "artifactName": "KillingFloor-Mutator-Tools-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "LICENSE"
+    ],
+    "electronLanguages": [
+      "en-US"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "KillingFloor-Mutator-Tools-${version}-${os}-${arch}-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "KillingFloor-Mutator-Tools-${version}-${os}-${arch}-portable.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Development",
+      "icon": "build/icon.png",
+      "maintainer": "TheBestPlan"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "TheBestPlan",
+        "repo": "killingfloor-mutator-tools"
+      }
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "commit-and-tag-version": "12.7.3",
+    "electron": "^33.0.0",
+    "electron-builder": "^26.15.3",
+    "husky": "9.1.7"
+  }
+}

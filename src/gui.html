@@ -1,0 +1,200 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later
+     Copyright (c) 2026 TheBestPlan -->
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Killing Floor Mutator Tools</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: dark; --bg:#14161a; --panel:#1c1f26; --line:#2b303b; --text:#dfe3ea; --muted:#8b93a3; --accent:#c1462d; --ok:#4caf78; --bad:#e0554a; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--text); }
+  header { display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1px solid var(--line); }
+  header h1 { font-size:15px; margin:0; letter-spacing:.08em; text-transform:uppercase; }
+  header .dir { color:var(--muted); font-size:12px; margin-left:auto; }
+  header .lang { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:12px; }
+  header .lang select { background:var(--panel); border:1px solid var(--line); color:var(--text); padding:4px 6px; border-radius:4px; font:inherit; }
+  main { display:grid; grid-template-columns:minmax(340px,420px) 1fr; gap:0; height:calc(100vh - 49px); }
+  .panel { padding:18px; overflow:auto; border-right:1px solid var(--line); }
+  label { display:block; margin:14px 0 4px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  input[type=text], textarea { width:100%; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:6px; padding:8px 10px; font:13px/1.4 ui-monospace, monospace; }
+  textarea { resize:vertical; min-height:64px; }
+  .row { display:flex; gap:8px; align-items:center; }
+  .checks { display:flex; gap:18px; margin-top:14px; }
+  .checks label { margin:0; text-transform:none; letter-spacing:0; color:var(--text); display:flex; gap:6px; align-items:center; }
+  button { background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:6px; padding:8px 14px; cursor:pointer; font:inherit; white-space:nowrap; }
+  /* A translated label is longer than "Detect"; without this the flex row crushes the button. */
+  .row button { flex:none; }
+  button:hover:not(:disabled) { border-color:var(--accent); }
+  button.primary { background:var(--accent); border-color:var(--accent); font-weight:600; }
+  button:disabled { opacity:.5; cursor:default; }
+  .actions { display:flex; gap:8px; margin-top:20px; flex-wrap:wrap; }
+  #status { margin-top:14px; font-size:13px; white-space:pre-wrap; }
+  #status.ok { color:var(--ok); } #status.bad { color:var(--bad); }
+  pre#log { margin:0; padding:18px; overflow:auto; height:100%; font:12px/1.55 ui-monospace, monospace; white-space:pre-wrap; }
+  @media (max-width:820px) { main { grid-template-columns:1fr; height:auto; } .panel { border-right:0; border-bottom:1px solid var(--line); } pre#log { height:50vh; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>killingfloor-mutator-tools</h1>
+  <span class="dir" id="configDir"></span>
+  <label class="lang"><span data-i18n="ui.language">Language</span><select id="lang"></select></label>
+</header>
+<main>
+  <section class="panel">
+    <label for="gamePath" data-i18n="label.gamePath">Killing Floor folder</label>
+    <div class="row">
+      <input type="text" id="gamePath" placeholder="…/steamapps/common/KillingFloor">
+      <button id="detect" data-i18n="btn.detect" data-i18n-title="title.detect" title="Find via Steam libraries">Detect</button>
+    </div>
+
+    <label for="uccPath" data-i18n="label.uccPath">UCC.exe (blank = auto)</label>
+    <input type="text" id="uccPath" placeholder="auto" data-i18n-ph="ph.auto">
+
+    <label for="packages" data-i18n="label.packages">Mutator source folders (one per line, build order)</label>
+    <textarea id="packages" spellcheck="false"></textarea>
+
+    <label for="resourcePaths" data-i18n="label.resourcePaths">Resource roots (System / Textures / Sounds / …)</label>
+    <textarea id="resourcePaths" spellcheck="false"></textarea>
+
+    <label for="outputPath" data-i18n="label.outputPath">Output folder</label>
+    <input type="text" id="outputPath">
+
+    <label for="copyTo" data-i18n="label.copyTo">Also copy .u/.ucl to (one per line)</label>
+    <textarea id="copyTo" spellcheck="false"></textarea>
+
+    <label for="workspace" data-i18n="label.workspace">Workspace (isolated System)</label>
+    <input type="text" id="workspace">
+
+    <div class="checks">
+      <label><input type="checkbox" id="strip"> <span data-i18n="chk.strip">strip source</span></label>
+      <label><input type="checkbox" id="compress"> <span data-i18n="chk.compress">compress .uz2</span></label>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="build" data-i18n="btn.build">Build</button>
+      <button id="save" data-i18n="btn.save">Save</button>
+      <button id="check" data-i18n="btn.check">Check</button>
+    </div>
+    <div id="status"></div>
+  </section>
+  <pre id="log"></pre>
+</main>
+
+<script src="/i18n.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+// i18n.js owns the dictionaries; apply() repaints the window, setText() keeps script-written
+// status lines keyed so they re-render on a switch too.
+const I18N = window.KFI18N;
+const LANG_KEY = "kfmt.lang";
+const LISTS = ["packages", "resourcePaths", "copyTo"];
+const TEXTS = ["gamePath", "uccPath", "outputPath", "workspace"];
+const FLAGS = ["strip", "compress"];
+const logEl = $("log");
+
+// say() takes a translation key; sayRaw() takes text the server produced (config problems,
+// compiler errors), which has no key to re-render from.
+function say(key, kind = "", vars) {
+  I18N.setText($("status"), key, vars);
+  $("status").className = kind;
+}
+
+function sayRaw(message, kind = "") {
+  I18N.setRaw($("status"), message);
+  $("status").className = kind;
+}
+
+function append(line) {
+  logEl.textContent += line + "\n";
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function readForm() {
+  const config = {};
+  TEXTS.forEach((id) => (config[id] = $(id).value.trim()));
+  LISTS.forEach((id) => (config[id] = $(id).value.split("\n").map((s) => s.trim()).filter(Boolean)));
+  FLAGS.forEach((id) => (config[id] = $(id).checked));
+  return config;
+}
+
+async function post(url, body) {
+  const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+  return response.json();
+}
+
+async function load() {
+  const { config, problems, configDir } = await (await fetch("/api/config")).json();
+  $("configDir").textContent = configDir;
+  TEXTS.forEach((id) => ($(id).value = config[id] || ""));
+  LISTS.forEach((id) => ($(id).value = (config[id] || []).join("\n")));
+  FLAGS.forEach((id) => ($(id).checked = Boolean(config[id])));
+  if (problems.length) sayRaw(problems.join("\n"), "bad");
+  else say("status.ready", "ok");
+}
+
+$("detect").onclick = async () => {
+  const found = await post("/api/detect");
+  if (!found.gamePath) return say("status.noInstall", "bad");
+  $("gamePath").value = found.gamePath;
+  if (found.uccPath) $("uccPath").value = found.uccPath;
+  say("status.detected", "ok");
+};
+
+$("save").onclick = async () => {
+  await post("/api/config", readForm());
+  await load();
+};
+
+$("check").onclick = async () => {
+  await post("/api/config", readForm());
+  await load();
+};
+
+$("build").onclick = async () => {
+  await post("/api/config", readForm());
+  logEl.textContent = "";
+  const result = await post("/api/build");
+  if (result.error) sayRaw(result.error, "bad");
+};
+
+const events = new EventSource("/api/events");
+events.addEventListener("start", () => { $("build").disabled = true; say("status.building"); });
+events.addEventListener("log", (event) => append(JSON.parse(event.data)));
+events.addEventListener("done", (event) => {
+  const result = JSON.parse(event.data);
+  $("build").disabled = false;
+  say("status.built", "ok", { packages: result.packages.join(", "), seconds: result.seconds });
+});
+events.addEventListener("fail", (event) => {
+  $("build").disabled = false;
+  sayRaw(JSON.parse(event.data), "bad");
+});
+
+I18N.LANGS.forEach(([code, label]) => {
+  const option = document.createElement("option");
+  option.value = code;
+  option.textContent = label;
+  $("lang").appendChild(option);
+});
+
+// The language is a UI preference, not build configuration: it lives in localStorage rather than
+// in killingfloor-mutator-tools.config.json, which is the CLI's input and is meant to be committed.
+$("lang").onchange = () => {
+  I18N.apply($("lang").value);
+  try { localStorage.setItem(LANG_KEY, $("lang").value); } catch (e) { /* private mode: session only */ }
+};
+
+let saved = "en";
+try { saved = localStorage.getItem(LANG_KEY) || "en"; } catch (e) { /* ignore */ }
+$("lang").value = I18N.DICT[saved] ? saved : "en";
+I18N.apply($("lang").value);
+
+load();
+</script>
+</body>
+</html>

@@ -61,7 +61,7 @@ node bin/killingfloor-mutator-tools.js build KF15BetaMutators   # 只编译其�
 | `uccPath` | `UCC.exe`；留空 = 在各个 Steam 库中自动查找，优先专用服务器 |
 | `workspace` | 隔离的编译目录，可以随时删除；名字要短，因为 UCC 不支持长路径 |
 | `packages` | mutator 源码目录（每个都含有 `Classes/`），**按构建顺序排列** |
-| `resourcePaths` | 含有 `System/`、`Textures/`、`Sounds/`、`StaticMeshes/`、`Animations/` 的根目录，里面放自制内容和预先编译好的依赖包 |
+| `resourcePaths` | 含有 `System/`、`Textures/`、`Sounds/`、`StaticMeshes/`、`Animations/` 的根目录，里面放自制内容、预先编译好的依赖包，以及会被编译进包里的 `.ini` |
 | `outputPath` | `.u`、`.ucl` 和 `.uz2` 的落地位置 |
 | `copyTo` | 额外接收 `.u`/`.ucl` 的目录，比如服务器的 `System/` 或 docker 资源目录 |
 | `strip` | 运行 `Editor.StripSourceCommandlet`，能把 `.u` 大致缩小一半 |

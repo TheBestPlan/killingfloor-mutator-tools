@@ -40,6 +40,8 @@ fs.writeFileSync(
 fs.writeFileSync(path.join(gameSystem, "Core.dll"), "stub");
 fs.writeFileSync(path.join(resourceRoot, "System", "DepPackage.u"), "prebuilt");
 fs.writeFileSync(path.join(resourceRoot, "System", "MyMutator.u"), "stale prebuilt copy");
+fs.writeFileSync(path.join(resourceRoot, "System", "MyMutator.ini"), "[MyMutator.MutFoo]\r\nbEnabled=True\r\n");
+fs.writeFileSync(path.join(resourceRoot, "System", "KillingFloor.ini"), "resource copy that must never win");
 
 const context = {
   gamePath,
@@ -75,6 +77,21 @@ assert.ok(
   "a prebuilt copy of a package being built from source must not be staged"
 );
 
+// `make` bakes whatever the package ini holds into the .u as the `var config`
+// defaults, so the shipped ini has to be staged even for the package being built.
+const stagedMutatorIni = path.join(workspaceSystem, "MyMutator.ini");
+assert.ok(fs.existsSync(stagedMutatorIni), "the package ini must be staged, unlike its prebuilt .u");
+assert.ok(
+  fs.readFileSync(path.join(workspaceSystem, "KillingFloor.ini"), "latin1").includes("[Core.System]"),
+  "a resource folder must never replace the generated engine ini"
+);
+
+fs.writeFileSync(stagedMutatorIni, "rewritten by the engine", "latin1");
+assert.ok(
+  fs.readFileSync(path.join(resourceRoot, "System", "MyMutator.ini"), "latin1").includes("bEnabled=True"),
+  "the staged ini must be a copy — the engine rewrites it and that must not reach the sources"
+);
+
 /* ---------------------------------------------------------------- errors */
 
 fs.writeFileSync(
@@ -91,4 +108,4 @@ assert.ok(problems.some((problem) => problem.includes("gamePath")), "missing gam
 assert.ok(problems.some((problem) => problem.includes("packages")), "empty package list must be reported");
 
 fs.rmSync(root, { recursive: true, force: true });
-console.log("smoke: 10 assertions passed");
+console.log("smoke: 14 assertions passed");

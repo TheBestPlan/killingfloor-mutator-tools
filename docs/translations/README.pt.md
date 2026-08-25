@@ -61,7 +61,7 @@ node bin/killingfloor-mutator-tools.js build KF15BetaMutators   # compilar apena
 | `uccPath` | `UCC.exe`; vazio = deteção automática pelas bibliotecas Steam, primeiro o servidor dedicado |
 | `workspace` | pasta de compilação isolada, pode ser apagada sem risco; mantém o nome curto, porque o UCC não suporta caminhos longos |
 | `packages` | pastas de código dos mutadores (cada uma com o seu `Classes/`), **por ordem de compilação** |
-| `resourcePaths` | raízes com `System/`, `Textures/`, `Sounds/`, `StaticMeshes/`, `Animations/` que contêm conteúdo próprio e pacotes de dependências já compilados |
+| `resourcePaths` | raízes com `System/`, `Textures/`, `Sounds/`, `StaticMeshes/`, `Animations/` que contêm conteúdo próprio, pacotes de dependências já compilados e os `.ini` de pacote embutidos na compilação |
 | `outputPath` | onde acabam os `.u`, `.ucl` e `.uz2` |
 | `copyTo` | pastas adicionais que recebem os `.u`/`.ucl`, como o `System/` de um servidor ou uma pasta de recursos de docker |
 | `strip` | correr o `Editor.StripSourceCommandlet`, que reduz o `.u` a cerca de metade |

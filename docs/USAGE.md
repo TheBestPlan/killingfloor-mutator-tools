@@ -52,7 +52,7 @@ The desktop app takes the same directory as its first argument. Without one, a p
 | `uccPath` | `UCC.exe`; blank = auto-detect across the Steam libraries, dedicated server first |
 | `workspace` | isolated compile folder, safe to delete; keep the name short, because UCC has no long-path support |
 | `packages` | mutator source folders (each holds `Classes/`), **in build order** |
-| `resourcePaths` | roots with `System/`, `Textures/`, `Sounds/`, `StaticMeshes/`, `Animations/` holding custom content and prebuilt dependency packages |
+| `resourcePaths` | roots with `System/`, `Textures/`, `Sounds/`, `StaticMeshes/`, `Animations/` holding custom content, prebuilt dependency packages and the package `.ini` files that get compiled into the build |
 | `outputPath` | where `.u`, `.ucl` and `.uz2` land |
 | `copyTo` | extra folders to receive `.u`/`.ucl`, such as a server `System/` or a docker resources folder |
 | `strip` | run `Editor.StripSourceCommandlet`, which roughly halves the `.u` |
@@ -78,7 +78,7 @@ The desktop app takes the same directory as its first argument. Without one, a p
 }
 ```
 
-`packages` is ordered: a package that another one depends on has to come first. `resourcePaths` is where custom content and prebuilt dependency packages live — see [`GOTCHAS.md`](./GOTCHAS.md#prebuilt-dependencies-are-linked-in-never-put-on-the-search-path) for why prebuilt `.u` files are linked into the workspace rather than added to the search path.
+`packages` is ordered: a package that another one depends on has to come first. `resourcePaths` is where custom content, prebuilt dependency packages and package `.ini` files live — see [`GOTCHAS.md`](./GOTCHAS.md#prebuilt-dependencies-are-linked-in-never-put-on-the-search-path) for why prebuilt `.u` files are linked into the workspace rather than added to the search path, and [why a package ini is compiled into the `.u`](./GOTCHAS.md#a-package-ini-is-compiled-into-the-u).
 
 ## The GUI
 

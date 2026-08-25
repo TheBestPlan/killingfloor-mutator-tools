@@ -61,7 +61,7 @@ node bin/killingfloor-mutator-tools.js build KF15BetaMutators   # そのうち�
 | `uccPath` | `UCC.exe`。空 = Steam ライブラリを自動探索、専用サーバーを優先 |
 | `workspace` | 隔離されたコンパイル用フォルダ。削除して構わない。UCC は長いパスに対応していないので名前は短く保つこと |
 | `packages` | mutator のソースフォルダ（各々が `Classes/` を持つ）、**ビルド順に** |
-| `resourcePaths` | 自作コンテンツやビルド済み依存パッケージを収めた `System/`、`Textures/`、`Sounds/`、`StaticMeshes/`、`Animations/` を持つルート |
+| `resourcePaths` | 自作コンテンツ、ビルド済み依存パッケージ、ビルドに焼き込まれるパッケージの `.ini` を収めた `System/`、`Textures/`、`Sounds/`、`StaticMeshes/`、`Animations/` を持つルート |
 | `outputPath` | `.u`、`.ucl`、`.uz2` の出力先 |
 | `copyTo` | `.u`/`.ucl` を追加で受け取るフォルダ。サーバーの `System/` や docker のリソースフォルダなど |
 | `strip` | `Editor.StripSourceCommandlet` を実行する。`.u` がおよそ半分になる |

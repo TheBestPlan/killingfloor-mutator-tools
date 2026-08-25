@@ -61,7 +61,7 @@ node bin/killingfloor-mutator-tools.js build KF15BetaMutators   # sukompiliuoti 
 | `uccPath` | `UCC.exe`; tuščia = automatinė paieška Steam bibliotekose, pirmiausia dedikuotame serveryje |
 | `workspace` | izoliuotas kompiliavimo aplankas, saugu ištrinti; laikyk pavadinimą trumpą, nes UCC nepalaiko ilgų kelių |
 | `packages` | mutatorių pirminio kodo aplankai (kiekviename yra `Classes/`), **kompiliavimo eiliškumu** |
-| `resourcePaths` | šaknys su `System/`, `Textures/`, `Sounds/`, `StaticMeshes/`, `Animations/`, kuriose laikomas savas turinys ir iš anksto sukompiliuoti priklausomybių paketai |
+| `resourcePaths` | šaknys su `System/`, `Textures/`, `Sounds/`, `StaticMeshes/`, `Animations/`, kuriose laikomas savas turinys, iš anksto sukompiliuoti priklausomybių paketai ir paketo `.ini`, įkompiliuojami į paketą |
 | `outputPath` | kur atsiduria `.u`, `.ucl` ir `.uz2` |
 | `copyTo` | papildomi aplankai, į kuriuos nukopijuojami `.u`/`.ucl` — pavyzdžiui serverio `System/` ar docker išteklių aplankas |
 | `strip` | paleisti `Editor.StripSourceCommandlet`, kuris sumažina `.u` maždaug perpus |

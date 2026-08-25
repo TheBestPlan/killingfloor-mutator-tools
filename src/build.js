@@ -20,7 +20,9 @@ const WORKSPACE_FILE_PATTERNS = [/\.dll$/i, /\.int$/i];
 const WORKSPACE_REQUIRED_FILES = ["Default.ini", "DefUser.ini"];
 
 const GAME_INI = "KillingFloor.ini";
-const CONTENT_DIRS = ["System", "Textures", "Sounds", "StaticMeshes", "Animations", "Music", "Maps", "KarmaData"];
+// Written or copied per workspace; a resource folder never gets to replace them.
+const ENGINE_INI_FILES = [GAME_INI, ...WORKSPACE_REQUIRED_FILES, "User.ini"];
+const CONTENT_DIRS =["System", "Textures", "Sounds", "StaticMeshes", "Animations", "Music", "Maps", "KarmaData"];
 const CONTENT_EXT = {
   System: "*.u",
   Textures: "*.utx",
@@ -171,6 +173,12 @@ function contentPathsFor(root, dirs = CONTENT_DIRS) {
 // Prebuilt dependency packages are linked into the workspace rather than reached
 // through Paths: `ucc make` skips any package whose .u it can already see, so a
 // prebuilt copy anywhere on the search path would silently cancel the rebuild.
+//
+// A package's own .ini comes along too, and unlike the .u it is staged even for the
+// package being built: `make` calls LoadConfig on every compiled class, so whatever
+// the ini holds is what lands in the .u as the default for a `var config`. Without
+// it the shipped configuration is replaced by whatever the source happens to
+// declare. The engine's own ini files are generated per workspace and never staged.
 function stageResourcePackages(context, packageNames) {
   const built = new Set(packageNames.map((name) => name.toLowerCase()));
 
@@ -179,11 +187,23 @@ function stageResourcePackages(context, packageNames) {
     if (!fs.existsSync(systemDir)) continue;
 
     for (const name of fs.readdirSync(systemDir)) {
-      if (!/\.(u|ucl)$/i.test(name)) continue;
-      if (built.has(name.replace(/\.(u|ucl)$/i, "").toLowerCase())) continue;
+      if (!/\.(u|ucl|ini)$/i.test(name)) continue;
 
       const from = path.join(systemDir, name);
       const to = path.join(context.workspaceSystem, name);
+
+      // Copied, never linked: the engine rewrites a package ini whenever a compiled
+      // class saves config, and a hard link would carry that back into the sources.
+      if (/\.ini$/i.test(name)) {
+        if (ENGINE_INI_FILES.some((reserved) => reserved.toLowerCase() === name.toLowerCase())) continue;
+        fs.rmSync(to, { force: true });
+        fs.copyFileSync(from, to);
+        context.log(`  config ${name}`);
+        continue;
+      }
+
+      if (built.has(name.replace(/\.(u|ucl)$/i, "").toLowerCase())) continue;
+
       const source = fs.statSync(from);
       const existing = fs.existsSync(to) && fs.statSync(to);
       if (existing && existing.size === source.size && existing.mtimeMs >= source.mtimeMs) continue;

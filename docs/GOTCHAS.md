@@ -14,6 +14,23 @@ The tool runs one `ucc make` per package, in the order `packages` lists them. Pa
 
 So prebuilt dependencies from `resourcePaths/System` are linked into the workspace instead of being added to `Paths`. A prebuilt copy of a package you are also building from source is ignored.
 
+## A package ini is compiled *into* the `.u`
+
+`ucc make` calls `LoadConfig` on every class it compiles, so whatever `<Package>.ini` holds at
+compile time becomes the `.u`'s default for each `var config` variable. Compile with the ini
+present and the shipped configuration is baked in; compile without it and those defaults fall
+back to whatever the source happens to declare — same sources, different artifact, no warning
+either way.
+
+So `resourcePaths/System/*.ini` is staged into the workspace, and unlike a prebuilt `.u` it is
+staged even for the package being built. It is **copied, not linked**: the engine rewrites a
+package ini whenever a compiled class saves config, and a hard link would carry that back into
+your sources. The engine's own `KillingFloor.ini`, `Default.ini`, `DefUser.ini` and `User.ini`
+are generated per workspace and are never taken from a resource folder.
+
+The corollary is worth stating: an ini that is not in `resourcePaths` does not participate.
+A stray `<Package>.ini` in some local toolchain folder cannot leak its values into a release.
+
 ## Build outputs never stay in the workspace
 
 A stripped `.u` left next to its `Classes/` folder makes the next `ucc make` try to re-parse sourceless classes, and the run fails with `Missing 'Class' definition`.
